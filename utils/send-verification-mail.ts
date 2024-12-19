@@ -1,23 +1,24 @@
-import { createTransport } from "nodemailer";
+"use server";
 
+import { createTransport } from "nodemailer";
 export async function sendVerificationEmail(params) {
   const { url, theme, identifier } = params;
   const { host } = new URL(url);
   // NOTE: You are not required to use `nodemailer`, use whatever you want.
 
   const transporter = createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    host: process.env.EMAIL_SERVER,
+    port: Number(process.env.SERVER_PORT),
+    secure: process.env.SERVER_SECURE === "true",
     auth: {
-      user: "8176e3001@smtp-brevo.com", // generated ethereal user
-      pass: "S90qGdFJPE5kyzXA", // generated ethereal password
+      user: process.env.SERVER_USER,
+      pass: process.env.SERVER_PASS,
     },
   });
 
   // send mail with defined transport object
   const result = await transporter.sendMail({
-    from: '"Nasif" nfuad714@gmail.com', // sender address
+    from: `'${process.env.EMAIL_NAME}' ${process.env.EMAIL_FROM}`, // sender address
     to: `${identifier}`, // list of receivers
     subject: `Sign in to ${host}`,
     text: text({ url, host }),
